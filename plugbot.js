@@ -58,13 +58,18 @@ var userList;
 var skippingVideo = false;
 
 /*
+ * Toggle UI
+ */
+var UI2;
+
+/*
  * Cookie constants
  */
 var COOKIE_WOOT = 'autowoot';
 var COOKIE_QUEUE = 'autoqueue';
 var COOKIE_HIDE_VIDEO = 'hidevideo';
 var COOKIE_USERLIST = 'userlist';
-
+var COOKIE_UI = 'UI2';   
 /*
  * Maximum amount of people that can be in the waitlist.
  */
@@ -98,10 +103,7 @@ function initAPIListeners()
      */
     API.on(API.VOTE_UPDATE, function (obj) 
 	{
-        if (userList) 
-		{
             populateUserlist();
-        }
     });
 
     /*
@@ -109,10 +111,7 @@ function initAPIListeners()
      */
     API.on(API.USER_JOIN, function (user) 
 	{
-        if (userList) 
-		{
             populateUserlist();
-        }
     });
 
     /*
@@ -120,14 +119,11 @@ function initAPIListeners()
      */
     API.on(API.USER_LEAVE, function (user) 
 	{
-        if (userList) 
-		{
             populateUserlist();
-        }
     });
 }
 //Version Numbering chat log
-var major =2,minor=0,patch=0;
+var major =2,minor=1,patch=0;
    var a = $('#chat-messages'),b = a.scrollTop() > a[0].scrollHeight - a.height() - 20;
     a.append('<div class="chat-update"><span class="chat-text" style="color:#00FF33"><b>Running PlugBot-TFL version ' + major + '.' + minor + '.' + patch + '</b></span></div>');
 
@@ -142,19 +138,28 @@ function displayUI()
      * reloads the script without refreshing the page (updating.)
      */
     $('#plugbot-ui').remove();
+    $('#plugbot-ui2').remove();
 
     /*
      * Generate the HTML code for the UI.
      */
     $('#chat').prepend('<div id="plugbot-ui"></div>');
+    $('#chat').prepend('<div id="plugbot-ui2"></div>')
 	
     var cWoot = autowoot ? '#3FFF00' : '#ED1C24';
     var cQueue = autoqueue ? '#3FFF00' : '#ED1C24';
-    var cHideVideo = hideVideo ? '#3FFF00' : '#ED1C24';
+    var cHideVideo = hideVideo ? '#3FFF00' : '#ED1C24';	
     var cUserList = userList ? '#3FFF00' : '#ED1C24';
-	
+    var cUI = UI2 ? '#3FFF00' : '#ED1C24';
     $('#plugbot-ui').append(
-        '<p id="plugbot-btn-woot" style="color:' + cWoot + '">auto-woot</p><p id="plugbot-btn-queue" style="color:' + cQueue + '">auto-queue</p><p id="plugbot-btn-hidevideo" style="color:' + cHideVideo + '">hide video</p><p id="plugbot-btn-skipvideo" style="color:#ED1C24">skip video</p><p id="plugbot-btn-userlist" style="color:' + cUserList + '">userlist</p>');
+        '<p id="plugbot-btn-woot" style="color:' + cWoot + '">auto-woot</p>'
+        +'<p id="plugbot-btn-queue" style="color:' + cQueue + '">auto-queue</p>'
+        +'<p id="plugbot-btn-hidevideo" style="color:' + cHideVideo + '">hide video</p>'
+        +'<p id="plugbot-btn-skipvideo" style="color:#ED1C24">skip video</p>'
+        +'<p id="plugbot-btn-userlist" style="color:' + cUserList + '">userlist</p>');
+    $('#plugbot-ui2').append(
+    '<p id="plugbot-btn-UI" style="color:' + cUI + '">UI On</p>');
+
 }
 
 /**
@@ -165,21 +170,21 @@ function displayUI()
  */
 function initUIListeners() 
 {
-    /*
+        /*
      * Toggle userlist.
      */
     $('#plugbot-btn-userlist').on("click", function() 
-	{
+    {
         userList = !userList;
         $(this).css('color', userList ? '#3FFF00' : '#ED1C24');
         $('#plugbot-userlist').css('visibility', userList ? 'visible' : 'hidden');
-		
+        
         if (!userList) 
-		{
+        {
             $('#plugbot-userlist').empty();
         } 
-		else 
-		{
+        else 
+        {
             populateUserlist();
         }
         jaaulde.utils.cookies.set(COOKIE_USERLIST, userList);
@@ -243,8 +248,20 @@ function initUIListeners()
 			$('#plugbot-btn-hidevideo').click();
 			$('#button-sound').click();
 		}
-	});
 
+	});
+    /*
+     * Toggle the UI
+     */
+    $('#plugbot-btn-UI').on('click', function()
+    {
+        UI2 = !UI2;
+        $(this).css('color', UI2 ? '#33FFF0' : '#ED1C24');
+        $(this).text(UI2 ? 'UI On' : 'UI Off');
+        $('#plugbot-ui').css('visibility', UI2 ? 'visible' : 'hidden');
+        jaaulde.utils.cookies.set(COOKIE_UI, UI2);
+
+   });  
     /*
      * Toggle auto-queue/auto-DJ.
      */
@@ -292,14 +309,7 @@ function djAdvanced(obj)
 	{
         $('#button-vote-positive').click();
     }
-
-    /*
-     * If the userlist is enabled, re-populate it.
-     */
-    if (userList) 
-	{
         populateUserlist();
-    }
 }
 
 /**
@@ -374,11 +384,11 @@ function populateUserlist()
     for (var i in API.getWaitList()) {
             standby.push(API.getWaitList()[i].id);
         }
-    if ($('#button-dj-waitlist-view').attr('title') !== '') 
+    var position = standby.indexOf(API.getUser().id);
+    if (position > 0) 
 	{
-        var position = standby.indexOf(API.getUser().id);
             $('#plugbot-userlist').append('<h1 id="plugbot-queuespot"><span style="font-variant:small-caps">Waitlist:</span> ' + position +' / ' +API.getWaitList().length + '</h3><br />');
-        }
+    }
     
 
     /*
@@ -654,22 +664,34 @@ function readCookies()
      */
     value = jaaulde.utils.cookies.get(COOKIE_HIDE_VIDEO);
     hideVideo = value != null ? value : false;
+ /*
+   * Read UI cookie (true by default)
+   */
+   value = jaaulde.utils.cookies.get(COOKIE_UI);
+   UI2 = value != null ? value : true;
+   
+   onCookiesLoaded();
 
-    /*
-     * Read userlist cookie (true by default)
-     */
-    value = jaaulde.utils.cookies.get(COOKIE_USERLIST);
-    userList = value != null ? value : true;
-
-    onCookiesLoaded();
 }
-
 
 /*
  * Write the CSS rules that are used for components of the
  * Plug.bot UI.
  */
-$('body').prepend('<style type="text/css" id="plugbot-css">#plugbot-ui { position: absolute; margin-top:280px;}#plugbot-ui p {height: 32px; padding-top: 8px; padding-left: 8px; padding-right: 6px; cursor: pointer; font-variant: small-caps; width: 84px; font-size: 15px; margin: 0; }#plugbot-ui h2 { background-color: #0b0b0b; height: 112px; width: 156px; margin: 0; color: #fff; font-size: 13px; font-variant: small-caps; padding: 8px 0 0 12px; border-top: 1px dotted #292929; }#plugbot-userlist {  width: 17%; position:absolute; top:225px; }#plugbot-userlist p { margin: 0; padding-top: 4px; text-indent: 24px; font-size: 11px; }#plugbot-userlist p:first-child { padding-top: 0px !important; }#plugbot-queuespot { color: #0000FF; text-align: left; font-size: 15px; margin-left: 8px } #plugbot-btn-queue {position:absolute;left:98px;top:0px;} #plugbot-btn-hidevideo {position:absolute;left:196px;top:0px;} #plugbot-btn-userlist {position:absolute;left:98px;top:40px;}');
+$('body').prepend('<style type="text/css" id="plugbot-css">'
+    +'#plugbot-ui { position: absolute; margin-top:280px;}'
+    +'#plugbot-ui p {height: 32px; padding-top: 8px; padding-left: 8px; padding-right: 6px; cursor: pointer; font-variant: small-caps; width: 84px; font-size: 15px; margin: 0; }#plugbot-ui h2 { background-color: #0b0b0b; height: 112px; width: 156px; margin: 0; color: #fff; font-size: 13px; font-variant: small-caps; padding: 8px 0 0 12px; border-top: 1px dotted #292929;}'
+    +'#plugbot-userlist {  width: 17%; position:absolute; top:240px;left:-230px;border-right:thick outset #00FFFF;background-color:rgba(255,0,0,0.5);}'
+    +'#plugbot-userlist:hover {  width: 17%;  position:absolute; top:240px; left:1px; float:right;}'
+    +'#plugbot-userlist p { margin: 0; padding-top: 4px; text-indent: 24px; font-size: 11px; }'
+    +'#plugbot-userlist p:first-child { padding-top: 0px !important; }'
+    +'#plugbot-queuespot { color: #0000FF; text-align: left; font-size: 15px; margin-left: 8px }' 
+    +'#plugbot-btn-queue {position:absolute;left:98px;top:0px;}'
+    +'#plugbot-btn-hidevideo {position:absolute;left:196px;top:0px;}'
+    +'#plugbot-btn-userlist {position:absolute;left:283px;top:0px;}'
+    +'#plugbot-btn-UI {position:absolute;right:-46px;top:40px;cursor: pointer; font-variant:small-caps;font-size:15px;}'
+
+);
 $('body').append('<div id="plugbot-userlist"></div>');
 
 
@@ -715,15 +737,7 @@ function onCookiesLoaded()
             duration: 'medium'
         });
     }
-
-    /*
-     * Generate userlist, if userList is enabled.
-     */
-    if (userList) 
-	{
-        populateUserlist();
-    }
-
+    populateUserlist();
     /*
      * Call all init-related functions to start the software up.
      */
