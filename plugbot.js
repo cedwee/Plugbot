@@ -126,7 +126,10 @@ function initAPIListeners()
         }
     });
 }
-
+//Version Numbering chat log
+var major =2,minor=0,patch=0;
+   var a = $('#chat-messages'),b = a.scrollTop() > a[0].scrollHeight - a.height() - 20;
+    a.append('<div class="chat-update"><span class="chat-text" style="color:#00FF33"><b>Running PlugBot-TFL version ' + major + '.' + minor + '.' + patch + '</b></span></div>');
 
 /**
  * Renders all of the Plug.bot "UI" that is visible beneath the video
@@ -362,7 +365,7 @@ function populateUserlist()
      * Disclaimer that yes, you can now mention people from the
      * userlist!
      */
-    $('#plugbot-userlist').append('<p style="padding-left:12px;text-indent:0px !important;font-style:italic;color:#42A5DC;font-size:11px;">Click a username to<br />@mention them! *NEW</p><br />');
+    $('#plugbot-userlist').append('<p style="padding-left:12px;text-indent:0px !important;font-style:italic;color:#00FFFF;font-size:11px;">Click a username to<br />mention them!</p><br />');
 
     /*
      * If the user is in the waitlist, show them their current spot.
@@ -666,7 +669,7 @@ function readCookies()
  * Write the CSS rules that are used for components of the
  * Plug.bot UI.
  */
-$('body').prepend('<style type="text/css" id="plugbot-css">#plugbot-ui { position: absolute; margin-left: 349px; }#plugbot-ui p { background-color: #0b0b0b; height: 32px; padding-top: 8px; padding-left: 8px; padding-right: 6px; cursor: pointer; font-variant: small-caps; width: 84px; font-size: 15px; margin: 0; }#plugbot-ui h2 { background-color: #0b0b0b; height: 112px; width: 156px; margin: 0; color: #fff; font-size: 13px; font-variant: small-caps; padding: 8px 0 0 12px; border-top: 1px dotted #292929; }#plugbot-userlist { border: 6px solid rgba(10, 10, 10, 0.8); border-left: 0 !important; background-color: #000000; padding: 8px 0px 20px 0px; width: 12%; }#plugbot-userlist p { margin: 0; padding-top: 4px; text-indent: 24px; font-size: 10px; }#plugbot-userlist p:first-child { padding-top: 0px !important; }#plugbot-queuespot { color: #42A5DC; text-align: left; font-size: 15px; margin-left: 8px }');
+$('body').prepend('<style type="text/css" id="plugbot-css">#plugbot-ui { position: absolute; margin-top:280px;}#plugbot-ui p {height: 32px; padding-top: 8px; padding-left: 8px; padding-right: 6px; cursor: pointer; font-variant: small-caps; width: 84px; font-size: 15px; margin: 0; }#plugbot-ui h2 { background-color: #0b0b0b; height: 112px; width: 156px; margin: 0; color: #fff; font-size: 13px; font-variant: small-caps; padding: 8px 0 0 12px; border-top: 1px dotted #292929; }#plugbot-userlist {  width: 17%; position:absolute; top:225px; }#plugbot-userlist p { margin: 0; padding-top: 4px; text-indent: 24px; font-size: 11px; }#plugbot-userlist p:first-child { padding-top: 0px !important; }#plugbot-queuespot { color: #0000FF; text-align: left; font-size: 15px; margin-left: 8px } #plugbot-btn-queue {position:absolute;left:98px;top:0px;} #plugbot-btn-hidevideo {position:absolute;left:196px;top:0px;} #plugbot-btn-userlist {position:absolute;left:98px;top:40px;}');
 $('body').append('<div id="plugbot-userlist"></div>');
 
 
