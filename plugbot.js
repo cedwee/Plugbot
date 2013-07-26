@@ -367,14 +367,16 @@ function populateUserlist()
     /*
      * If the user is in the waitlist, show them their current spot.
      */
+    var standby = []
+    for (var i in API.getWaitList()) {
+            standby.push(API.getWaitList()[i].id);
+        }
     if ($('#button-dj-waitlist-view').attr('title') !== '') 
 	{
-        if ($('#button-dj-waitlist-leave').css('display') === 'block' && ($.inArray(API.getDJs(), API.getUser()) == -1)) {
-            var spot = $('#button-dj-waitlist-view').attr('title').split('(')[1];
-            spot = spot.substring(0, spot.indexOf(')'));
-            $('#plugbot-userlist').append('<h1 id="plugbot-queuespot"><span style="font-variant:small-caps">Waitlist:</span> ' + spot + '</h3><br />');
+        var position = standby.indexOf(API.getUser().id);
+            $('#plugbot-userlist').append('<h1 id="plugbot-queuespot"><span style="font-variant:small-caps">Waitlist:</span> ' + position +' / ' +API.getWaitList().length + '</h3><br />');
         }
-    }
+    
 
     /*
      * An array of all of the room's users.
