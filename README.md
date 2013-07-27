@@ -1,6 +1,7 @@
 ## Plug.bot
 
 ##Edited by thedark1337
+Email:<1337.plug@gmail.com>
 
 Plugbot-TFL version used for the plug.dj room <a href="http://plug.dj/thedark1337">TFL</a>
 
@@ -21,11 +22,7 @@ Create a bookmark with the code in this URL:
 http://pastebin.com/raw.php?i=1c6bjt0D
 ### Author ###
 
-+ <strong>Conner Davis &lt;connergdavis@gmail.com&gt;</strong> <em>a.k.a. Fugitive.</em>  
-
-If you knew me as Logic, you can feel free to get mad at them for taking my original name.
-
-
++ <strong>Conner Davis <connergdavis@gmail.com></strong> <em>a.k.a. Fugitive.</em>  
 
 ### Copyright Notice ###
 
