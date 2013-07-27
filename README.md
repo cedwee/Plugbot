@@ -1,9 +1,9 @@
 ## Plug.bot
 
 ##Edited by thedark1337
+Email:<1337.plug@gmail.com>
 
-A collection of extensions to the growing online DJing website, <a href="http://plug.dj">plug.dj</a>.  The source code is written in JavaScript and uses the Plug.dj API anywhere possible.  Easily embeddable as a bookmark in your favorite browser.  Initially inspired by TechGuard's AutoWoot script from April 2012.
-
+Plugbot-TFL version used for the plug.dj room <a href="http://plug.dj/thedark1337">TFL</a>
 
 
 ### Features List ###
@@ -13,7 +13,7 @@ Feature | Purpose
 Auto Woot | Automatically WOOT! each song as it is played
 Auto Queue | Automatically add yourself back to the DJ Waitlist once you've been moved back into the crowd
 Userlist | A dynamic list of every user in the room, color-coded by their current vote.  Green = "Woot", Red = "Meh", White = No vote  Special usergroups (i.e. moderator) are denoted by the icon you'd normally see in the chat
-Toggle UI | Allows you to easily configure your Plug.bot experience;  enable or disable each of its features at the click of a button.  Red = Off, Green = On
+Toggle UI | Enable or disable each of plugbot's features at the click of a button.  Red = Off, Green = On
 Hide Video | Hides videos from view on the site -- this is in effect until disabled
 Skip Video | This is exactly like hide video, except it additionally mutes the audio and will automatically re-enable everything after the current video is over
 UI On | Toggle the whole UI to be on or off
@@ -22,11 +22,7 @@ Create a bookmark with the code in this URL:
 http://pastebin.com/raw.php?i=1c6bjt0D
 ### Author ###
 
-+ <strong>Conner Davis &lt;connergdavis@gmail.com&gt;</strong> <em>a.k.a. Fugitive.</em>  
-
-If you knew me as Logic, you can feel free to get mad at them for taking my original name.
-
-
++ <strong>Conner Davis <connergdavis@gmail.com></strong> <em>a.k.a. Fugitive.</em>  
 
 ### Copyright Notice ###
 
