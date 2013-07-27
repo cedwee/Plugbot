@@ -121,12 +121,64 @@ function initAPIListeners()
 	{
             populateUserlist();
     });
+    /*
+     *For Custom Chat Commands
+     */
+    API.on(API.CHAT, this.onChat)
+    API.on(API.CHAT_COMMAND, this.customChatCommand);
 }
 //Version Numbering chat log
 var major =2,minor=1,patch=0;
    var a = $('#chat-messages'),b = a.scrollTop() > a[0].scrollHeight - a.height() - 20;
     a.append('<div class="chat-update"><span class="chat-text" style="color:#00FF33"><b>Running PlugBot-TFL version ' + major + '.' + minor + '.' + patch + '</b></span></div>');
 
+
+//Custom Chat Commands
+function getUser(data) {
+        data = data.trim();
+        if (data.substr(0,1) === '@')
+            data = data.substr(1);
+
+        var users = API.getUsers();
+        for (var i in users) {
+            if (users[i].username.equalsIgnoreCase(data) || users[i].id.equalsIgnoreCase(data))
+                return users[i];
+            console.log(data)
+
+        }
+        return null;
+    }
+function customChatCommand(value)
+{
+    if (value.indexOf('/boot')=== 0) {
+        if(API.hasPermission(API.getUser().id,API.ROLE.BOUNCER))
+        {
+        if (value.indexOf('||') > 0) {
+            var reason = value.substr(6).split('|| ');
+            user = getUser(reason[0]);
+            API.moderateKickUser(user.id,reason[1]);
+            }
+        else{
+            user = getUser(value.substr(7));
+            API.moderateKickUser(user.id,'');
+        }
+    }
+}
+    if(value.indexOf('/queue')=== 0){
+        if(API.hasPermission(API.getUser().id,API.ROLE.BOUNCER))
+        {
+        user = getUser(value.substr(8))
+        API.moderateAddDJ(user.id)
+    }
+    }
+    if(value.indexOf('/take')=== 0){
+        if(API.hasPermission(API.getUser().id,API.ROLE.BOUNCER))
+        {
+        user = getUser(value.substr(6))
+        API.moderateRemoveDJ(user.id)
+    }
+    }
+    }
 /**
  * Renders all of the Plug.bot "UI" that is visible beneath the video
  * player.
@@ -380,17 +432,8 @@ function populateUserlist()
     /*
      * If the user is in the waitlist, show them their current spot.
      */
-    var standby = []
-    for (var i in API.getWaitList()) {
-            standby.push(API.getWaitList()[i].id);
-        }
-    var position = standby.indexOf(API.getUser().id);
-    if (position > 0) 
-	{
-            $('#plugbot-userlist').append('<h1 id="plugbot-queuespot"><span style="font-variant:small-caps">Waitlist:</span> ' + position +' / ' +API.getWaitList().length + '</h3><br />');
-    }
-    
-
+     var spot = API.getWaitListPosition();
+            $('#plugbot-userlist').append('<h1 id="plugbot-queuespot"><span style="font-variant:small-caps">Waitlist:</span> ' + (spot != -1 ? spot + ' / ' : '')+API.getWaitList().length + '</h3><br />');
     /*
      * An array of all of the room's users.
      */
@@ -681,7 +724,7 @@ function readCookies()
 $('body').prepend('<style type="text/css" id="plugbot-css">'
     +'#plugbot-ui { position: absolute; margin-top:280px;}'
     +'#plugbot-ui p {height: 32px; padding-top: 8px; padding-left: 8px; padding-right: 6px; cursor: pointer; font-variant: small-caps; width: 84px; font-size: 15px; margin: 0; }#plugbot-ui h2 { background-color: #0b0b0b; height: 112px; width: 156px; margin: 0; color: #fff; font-size: 13px; font-variant: small-caps; padding: 8px 0 0 12px; border-top: 1px dotted #292929;}'
-    +'#plugbot-userlist {  width: 17%; position:absolute; top:240px;left:-230px;border-right:thick outset #00FFFF;background-color:rgba(255,0,0,0.5);}'
+    +'#plugbot-userlist {  width: 17%; position:absolute; top:240px;left:-230px;border-right:thick outset #00FFFF;background-color:rgba(255,0,0,0.5);visibility:hidden;}'
     +'#plugbot-userlist:hover {  width: 17%;  position:absolute; top:240px; left:1px; float:right;}'
     +'#plugbot-userlist p { margin: 0; padding-top: 4px; text-indent: 24px; font-size: 11px; }'
     +'#plugbot-userlist p:first-child { padding-top: 0px !important; }'
