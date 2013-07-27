@@ -1,4 +1,3 @@
-
 ## Plug.bot
 
 ##Edited by thedark1337
@@ -17,8 +16,10 @@ Userlist | A dynamic list of every user in the room, color-coded by their curren
 Toggle UI | Allows you to easily configure your Plug.bot experience;  enable or disable each of its features at the click of a button.  Red = Off, Green = On
 Hide Video | Hides videos from view on the site -- this is in effect until disabled
 Skip Video | This is exactly like hide video, except it additionally mutes the audio and will automatically re-enable everything after the current video is over
-
-
+UI On | Toggle the whole UI to be on or off
+### Install Instructions ###
+Create a bookmark with the code in this URL:
+http://pastebin.com/raw.php?i=1c6bjt0D
 ### Author ###
 
 + <strong>Conner Davis &lt;connergdavis@gmail.com&gt;</strong> <em>a.k.a. Fugitive.</em>  
