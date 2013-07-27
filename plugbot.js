@@ -36,32 +36,17 @@
  *
  * @author 	Conner Davis (Fruity Loops)
  */
-/*
- * Whether the user has currently enabled auto-woot.
- */
+
 var autowoot;
-/*
- * Whether the user has currently enabled auto-queueing.
- */
 var autoqueue;
-/*
- * Whether or not the user has enabled hiding this video.
- */
 var hideVideo;
-/*
- * Whether or not the user has enabled the userlist.
- */
 var userList;
-/*
- * Whether the current video was skipped or not.
- */
 var skippingVideo = false;
-
-/*
- * Toggle UI
- */
 var UI2;
-
+var Alert = false;
+var time_last = 0;
+var timeout_update;
+var interval_update = 3000;
 /*
  * Cookie constants
  */
@@ -69,7 +54,7 @@ var COOKIE_WOOT = 'autowoot';
 var COOKIE_QUEUE = 'autoqueue';
 var COOKIE_HIDE_VIDEO = 'hidevideo';
 var COOKIE_USERLIST = 'userlist';
-var COOKIE_UI = 'UI2';   
+var COOKIE_UI = 'UI2';
 /*
  * Maximum amount of people that can be in the waitlist.
  */
@@ -101,40 +86,62 @@ function initAPIListeners()
      * This listens for whenever a user in the room either WOOT!s
      * or Mehs the current song.
      */
-    API.on(API.VOTE_UPDATE, function (obj) 
-	{
-            populateUserlist();
-    });
-
+    API.on(API.VOTE_UPDATE, onVote);
+    function onVote(obj){
+        time_last= 0;
+        populateUserlist();
+    }
     /*
      * Whenever a user joins, this listener is called.
      */
-    API.on(API.USER_JOIN, function (user) 
-	{
-            populateUserlist();
-    });
+    API.on(API.USER_JOIN, onJoin);
+    function onJoin(user){
+        time_last= 0;
+        populateUserlist();
+    }
 
     /*
      * Called upon a user exiting the room.
      */
-    API.on(API.USER_LEAVE, function (user) 
-	{
-            populateUserlist();
-    });
+    API.on(API.USER_LEAVE, onLeave);
+    function onLeave(user) {
+        time_last= 0;
+        populateUserlist();
+    }
+
     /*
      *For Custom Chat Commands
      */
-    API.on(API.CHAT, this.onChat)
-    API.on(API.CHAT_COMMAND, this.customChatCommand);
+    API.on(API.CHAT_COMMAND, customChatCommand);
+}
+function killAPIListeners()
+{
+    API.off(API.DJ_ADVANCE, djAdvanced);
+    API.off(API.WAIT_LIST_UPDATE, queueUpdate);
+    API.off(API.DJ_UPDATE, queueUpdate);
+    API.off(API.VOTE_UPDATE, this.onVote);
+    API.off(API.USER_JOIN, this.onJoin);
+    API.off(API.USER_LEAVE, this.onJoin);
+    API.off(API.CHAT, this.onChat);
+    API.off(API.CHAT_COMMAND, this.customChatCommand);
 }
 //Version Numbering chat log
-var major =2,minor=1,patch=0;
+var major =2,minor=1,patch=2;
    var a = $('#chat-messages'),b = a.scrollTop() > a[0].scrollHeight - a.height() - 20;
     a.append('<div class="chat-update"><span class="chat-text" style="color:#00FF33"><b>Running PlugBot-TFL version ' + major + '.' + minor + '.' + patch + '</b></span></div>');
-
+//force update user list on user join/leave
+function onJoin(){
+    time_last = 0;
+    setTimeout(function(){
+        djAdvanced(null);
+    },1000);
+}
 
 //Custom Chat Commands
 function getUser(data) {
+    if(API.getUsers().length > 1)
+    {
+
         data = data.trim();
         if (data.substr(0,1) === '@')
             data = data.substr(1);
@@ -143,16 +150,24 @@ function getUser(data) {
         for (var i in users) {
             if (users[i].username.equalsIgnoreCase(data) || users[i].id.equalsIgnoreCase(data))
                 return users[i];
-            console.log(data)
-
         }
         return null;
     }
+    }
 function customChatCommand(value)
 {
-    if (value.indexOf('/boot')=== 0) {
-        if(API.hasPermission(API.getUser().id,API.ROLE.BOUNCER))
-        {
+
+if(API.hasPermission(API.getUser().id,API.ROLE.BOUNCER))
+{
+    if(value.indexOf('/queue')=== 0){
+        user = getUser(value.substr(8))
+        API.moderateAddDJ(user.id)
+    }
+    if(value.indexOf('/take')=== 0){
+        user = getUser(value.substr(6))
+        API.moderateRemoveDJ(user.id)
+    }
+        if (value.indexOf('/boot')=== 0) {
         if (value.indexOf('||') > 0) {
             var reason = value.substr(6).split('|| ');
             user = getUser(reason[0]);
@@ -164,19 +179,23 @@ function customChatCommand(value)
         }
     }
 }
-    if(value.indexOf('/queue')=== 0){
-        if(API.hasPermission(API.getUser().id,API.ROLE.BOUNCER))
+    if(value.indexOf('/Alerts')===0){
+        if(value.substr(8)=='on')
         {
-        user = getUser(value.substr(8))
-        API.moderateAddDJ(user.id)
-    }
-    }
-    if(value.indexOf('/take')=== 0){
-        if(API.hasPermission(API.getUser().id,API.ROLE.BOUNCER))
+            API.chatLog('Alerts Enabled')
+            Alert = true;
+        }
+        if(value.substr(8)=='off')
         {
-        user = getUser(value.substr(6))
-        API.moderateRemoveDJ(user.id)
+            API.chatLog('Alerts disabled')
+            Alert = false;
+        }
     }
+
+    if(API.hasPermission(API.getUser().id,API.ROLE.MANAGER))
+    {
+       if(value.indexOf('/secure')===0){API.moderateRoomProps(true,true)}
+       if(value.indexOf('/release')===0){API.moderateRoomProps(false,true)}
     }
     }
 /**
@@ -237,6 +256,7 @@ function initUIListeners()
         } 
         else 
         {
+            time_last=0;
             populateUserlist();
         }
         jaaulde.utils.cookies.set(COOKIE_USERLIST, userList);
@@ -377,6 +397,8 @@ function queueUpdate()
 	{
         joinQueue();
     }
+    time_last = 0;
+    populateUserlist();
 }
 
 /**
@@ -412,6 +434,19 @@ function joinQueue()
  */
 function populateUserlist() 
 {
+    var date = new Date();
+    var tick = date.getTime();
+    date = null;
+    clearTimeout(timeout_update);
+    if(tick - time_last >= interval_update){
+        time_last = tick;
+    }
+    else{
+        timeout_update = setTimeout(function(){
+            populateUserlist();
+        }, interval_update);
+        return;
+    }
     /*
      * Destroy the old userlist DIV and replace it with a fresh
      * empty one to work with.
@@ -427,7 +462,7 @@ function populateUserlist()
      * Disclaimer that yes, you can now mention people from the
      * userlist!
      */
-    $('#plugbot-userlist').append('<p style="padding-left:12px;text-indent:0px !important;font-style:italic;color:#00FFFF;font-size:11px;">Click a username to<br />mention them!</p><br />');
+    $('#plugbot-userlist').append('<p style="padding-left:12px;text-indent:0px !important;font-style:italic;color:#00FFFF;font-size:11px;">Click a username to<br />mention them</p><br />');
 
     /*
      * If the user is in the waitlist, show them their current spot.
@@ -443,7 +478,7 @@ function populateUserlist()
      * Populate the users array with the next user
      * in the room (this is stored alphabetically.)
      */
-    for (user in API.getUsers()) 
+    for (var user in API.getUsers()) 
 	{
         users.push(API.getUsers()[user]);
     }
@@ -529,7 +564,7 @@ function appendUser(user)
      * to denote that they're playing right now (since
      * they can't vote their own song.)
      */
-    if (API.getDJs()[0].username == username) 
+    if (API.getDJs().length>0 && API.getDJs()[0].username == username) 
 	{
         if (imagePrefix === 'normal') 
 		{
@@ -637,8 +672,11 @@ function drawUserlistItem(imagePath, color, username)
     /*
      * Write the HTML code to the userlist.
      */
+     if(API.getDJs().length > 0)
+     {
     $('#plugbot-userlist').append(
         '<p style="cursor:pointer;' + (imagePath === 'void' ? '' : 'text-indent:6px !important;') + 'color:' + color + ';' + ((API.getDJs()[0].username == username) ? 'font-size:15px;font-weight:bold;' : '') + '" onclick="$(\'#chat-input-field\').val($(\'#chat-input-field\').val() + \'@' + username + ' \').focus();">' + username + '</p>');
+}
 }
 
 
