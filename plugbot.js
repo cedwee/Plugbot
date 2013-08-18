@@ -47,6 +47,7 @@ var Alert = false;
 var time_last = 0;
 var timeout_update;
 var interval_update = 3000;
+var plugBot;
 /*
  * Cookie constants
  */
@@ -108,6 +109,10 @@ function initAPIListeners()
         time_last= 0;
         populateUserlist();
     }
+    API.on(API.CHAT, onChat)
+    function onChat(data){
+       $('.chat-from-host').attr('style','background-image:url(https://raw.github.com/Maxorq/LastPlug/c75755255596c8e2f35fc087f6abfc2a6d875adf/img/sparkle.gif);');
+    }
 
     /*
      *For Custom Chat Commands
@@ -126,9 +131,10 @@ function killAPIListeners()
     API.off(API.CHAT_COMMAND, this.customChatCommand);
 }
 //Version Numbering chat log
-var major =2,minor=1,patch=2;
+var major =2,minor=1,patch=4;
    var a = $('#chat-messages'),b = a.scrollTop() > a[0].scrollHeight - a.height() - 20;
     a.append('<div class="chat-update"><span class="chat-text" style="color:#00FF33"><b>Running PlugBot-TFL version ' + major + '.' + minor + '.' + patch + '</b></span></div>');
+    b && a.scrollTop(a[0].scrollHeight);
 //force update user list on user join/leave
 function onJoin(){
     time_last = 0;
@@ -196,12 +202,32 @@ if(API.hasPermission(API.getUser().id,API.ROLE.BOUNCER))
     {
        if(value.indexOf('/secure')===0){API.moderateRoomProps(true,true)}
        if(value.indexOf('/release')===0){API.moderateRoomProps(false,true)}
+       if(value.indexOf('/ban')===0){      
+        if (value.indexOf('||') > 0) {
+            var reason = value.substr(4).split('|| ');
+            user = getUser(reason[0]);
+            API.moderateBanUser(user.id,reason[1]);
+            }
+        else{
+            user = getUser(value.substr(5));
+            API.moderateBanUser(user.id,'');
+        }
     }
-    }
+}
+}
 /**
  * Renders all of the Plug.bot "UI" that is visible beneath the video
  * player.
  */
+function close()
+{
+    killAPIListeners()
+    $('#plugbot-ui').remove();
+    $('#plugbot-ui2').remove();
+    $('#plugbot-userlist').remove();
+    $('#plugbot-css').remove();
+    $('#plugbot-js').remove();
+}
 function displayUI() 
 {
     /*
